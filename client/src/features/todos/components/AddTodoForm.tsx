@@ -1,11 +1,4 @@
 import { Button } from '@/components/ui/button';
-import {
-	Dialog,
-	DialogContent,
-	DialogFooter,
-	DialogHeader,
-	DialogTitle,
-} from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import {
 	Select,
@@ -15,28 +8,31 @@ import {
 	SelectValue,
 } from '@/components/ui/select';
 import {
-	useCreateCategoryMutation,
 	useCreateTodoMutation,
 	useGetCategoriesQuery,
-} from '@/lib/features/api/todosApi';
+} from '@/features/todos/api/todosApi';
 
+import { useToast, type ToastProps } from '@/hooks/useToast';
 import { Loader2, Plus } from 'lucide-react';
 import { useState } from 'react';
+import { CreateCategoryDialog } from './CreateCategoryDialog';
+
+interface ToastInput extends ToastProps {
+	title: string;
+	description: string;
+	variant?: 'default' | 'destructive';
+}
 
 export const AddTodoForm = () => {
+	const { toast } = useToast();
 	const [title, setTitle] = useState('');
 	const [priority, setPriority] = useState('5');
 	const [category, setCategory] = useState('');
-
 	const [dueDate, setDueDate] = useState('');
-
 	const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
-	const [newCategoryName, setNewCategoryName] = useState('');
 
 	const [createTodo, { isLoading }] = useCreateTodoMutation();
 	const { data: categories = [] } = useGetCategoriesQuery();
-	const [createCategory, { isLoading: isCreatingCat }] =
-		useCreateCategoryMutation();
 
 	if (!category && categories.length > 0) {
 		setCategory(categories[0].name);
@@ -51,26 +47,25 @@ export const AddTodoForm = () => {
 				title,
 				priority: Number(priority),
 				category: category || 'General',
-
 				dueDate: dueDate ? new Date(dueDate).toISOString() : null,
 			}).unwrap();
+
+			toast({
+				title: 'Task Added',
+				description: `"${title}" has been added successfully.`,
+			} as ToastInput);
+
 			setTitle('');
 			setPriority('5');
 			setDueDate('');
 		} catch (err) {
 			console.error('Failed to add todo', err);
-		}
-	};
 
-	const handleCreateCategory = async () => {
-		if (!newCategoryName.trim()) return;
-		try {
-			await createCategory({ name: newCategoryName }).unwrap();
-			setCategory(newCategoryName);
-			setIsCategoryModalOpen(false);
-			setNewCategoryName('');
-		} catch (err) {
-			console.error('Failed to create category', err);
+			toast({
+				variant: 'destructive',
+				title: 'Error creating task',
+				description: 'Failed to add the task. Please try again.',
+			} as ToastInput);
 		}
 	};
 
@@ -95,6 +90,7 @@ export const AddTodoForm = () => {
 						onChange={e => setTitle(e.target.value)}
 						className='flex-1 bg-background'
 					/>
+
 					<div className='relative w-auto'>
 						<Input
 							type='date'
@@ -148,37 +144,11 @@ export const AddTodoForm = () => {
 					</Button>
 				</div>
 			</form>
-
-			<Dialog open={isCategoryModalOpen} onOpenChange={setIsCategoryModalOpen}>
-				<DialogContent>
-					<DialogHeader>
-						<DialogTitle>Create New Category</DialogTitle>
-					</DialogHeader>
-					<div className='py-4'>
-						<Input
-							placeholder='Category Name (e.g. Fitness)'
-							value={newCategoryName}
-							onChange={e => setNewCategoryName(e.target.value)}
-							onKeyDown={e => e.key === 'Enter' && handleCreateCategory()}
-							className='bg-background'
-						/>
-					</div>
-					<DialogFooter>
-						<Button
-							variant='outline'
-							onClick={() => setIsCategoryModalOpen(false)}
-						>
-							Cancel
-						</Button>
-						<Button
-							onClick={handleCreateCategory}
-							disabled={isCreatingCat || !newCategoryName.trim()}
-						>
-							{isCreatingCat ? 'Creating...' : 'Create'}
-						</Button>
-					</DialogFooter>
-				</DialogContent>
-			</Dialog>
+			<CreateCategoryDialog
+				open={isCategoryModalOpen}
+				onOpenChange={setIsCategoryModalOpen}
+				onCategoryCreated={newCategory => setCategory(newCategory)}
+			/>
 		</>
 	);
 };

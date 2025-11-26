@@ -17,12 +17,12 @@ import { Separator } from '@/components/ui/separator';
 import {
 	GetTodosParams,
 	useGetCategoriesQuery,
-} from '@/lib/features/api/todosApi';
+} from '@/features/todos/api/todosApi';
 import {
 	setFilterCategory,
 	setFilterStatus,
 	setSort,
-} from '@/lib/features/filters/filterSlice';
+} from '@/features/todos/model/filterSlice';
 import { useAppDispatch, useAppSelector } from '@/lib/store';
 import { ArrowDownAZ, ArrowUpAZ, Filter } from 'lucide-react';
 

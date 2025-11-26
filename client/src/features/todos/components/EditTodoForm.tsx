@@ -1,11 +1,5 @@
 import { Button } from '@/components/ui/button';
-import {
-	Dialog,
-	DialogContent,
-	DialogFooter,
-	DialogHeader,
-	DialogTitle,
-} from '@/components/ui/dialog';
+import { DialogFooter } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import {
 	Select,
@@ -14,30 +8,36 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from '@/components/ui/select';
+
 import {
 	Todo,
-	useCreateCategoryMutation,
 	useGetCategoriesQuery,
 	useUpdateTodoMutation,
-} from '@/lib/features/api/todosApi';
+} from '@/features/todos/api/todosApi';
+
+import { useToast, type ToastProps } from '@/hooks/useToast';
 import { Loader2 } from 'lucide-react';
 import { useState } from 'react';
+import { CreateCategoryDialog } from './CreateCategoryDialog';
 
-interface EditTodoDialogProps {
-	todo: Todo;
-	open: boolean;
-	onOpenChange: (open: boolean) => void;
+interface ToastInput extends ToastProps {
+	title: string;
+	description: string;
+	variant?: 'default' | 'destructive';
 }
 
-const EditTodoForm = ({
-	todo,
-	onSuccess,
-	onCancel,
-}: {
+interface EditTodoFormProps {
 	todo: Todo;
 	onSuccess: () => void;
 	onCancel: () => void;
-}) => {
+}
+
+export const EditTodoForm = ({
+	todo,
+	onSuccess,
+	onCancel,
+}: EditTodoFormProps) => {
+	const { toast } = useToast();
 	const [title, setTitle] = useState(todo.title);
 	const [priority, setPriority] = useState(todo.priority.toString());
 	const [category, setCategory] = useState(todo.category);
@@ -49,12 +49,9 @@ const EditTodoForm = ({
 
 	const [dueDate, setDueDate] = useState(formatDateForInput(todo.dueDate));
 	const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
-	const [newCategoryName, setNewCategoryName] = useState('');
 
 	const [updateTodo, { isLoading }] = useUpdateTodoMutation();
 	const { data: categories = [] } = useGetCategoriesQuery();
-	const [createCategory, { isLoading: isCreatingCat }] =
-		useCreateCategoryMutation();
 
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
@@ -66,25 +63,23 @@ const EditTodoForm = ({
 				title,
 				priority: Number(priority),
 				category: category || 'General',
-
 				dueDate: dueDate ? new Date(dueDate).toISOString() : null,
 			}).unwrap();
+
+			toast({
+				title: 'Task updated',
+				description: 'Your changes have been saved successfully.',
+			} as ToastInput);
 
 			onSuccess();
 		} catch (err) {
 			console.error('Failed to update todo', err);
-		}
-	};
 
-	const handleCreateCategory = async () => {
-		if (!newCategoryName.trim()) return;
-		try {
-			await createCategory({ name: newCategoryName }).unwrap();
-			setCategory(newCategoryName);
-			setIsCategoryModalOpen(false);
-			setNewCategoryName('');
-		} catch (err) {
-			console.error('Failed to create category', err);
+			toast({
+				variant: 'destructive',
+				title: 'Error',
+				description: 'Failed to update the task. Please try again.',
+			} as ToastInput);
 		}
 	};
 
@@ -170,60 +165,11 @@ const EditTodoForm = ({
 				</DialogFooter>
 			</form>
 
-			<Dialog open={isCategoryModalOpen} onOpenChange={setIsCategoryModalOpen}>
-				<DialogContent>
-					<DialogHeader>
-						<DialogTitle>Create New Category</DialogTitle>
-					</DialogHeader>
-					<div className='py-4'>
-						<Input
-							placeholder='Category Name'
-							value={newCategoryName}
-							onChange={e => setNewCategoryName(e.target.value)}
-							onKeyDown={e => e.key === 'Enter' && handleCreateCategory()}
-							className='bg-background'
-						/>
-					</div>
-					<DialogFooter>
-						<Button
-							variant='outline'
-							onClick={() => setIsCategoryModalOpen(false)}
-						>
-							Cancel
-						</Button>
-						<Button
-							onClick={handleCreateCategory}
-							disabled={isCreatingCat || !newCategoryName.trim()}
-						>
-							{isCreatingCat ? 'Creating...' : 'Create'}
-						</Button>
-					</DialogFooter>
-				</DialogContent>
-			</Dialog>
+			<CreateCategoryDialog
+				open={isCategoryModalOpen}
+				onOpenChange={setIsCategoryModalOpen}
+				onCategoryCreated={setCategory}
+			/>
 		</>
-	);
-};
-
-export const EditTodoDialog = ({
-	todo,
-	open,
-	onOpenChange,
-}: EditTodoDialogProps) => {
-	return (
-		<Dialog open={open} onOpenChange={onOpenChange}>
-			<DialogContent className='sm:max-w-[425px]'>
-				<DialogHeader>
-					<DialogTitle>Edit Task</DialogTitle>
-				</DialogHeader>
-				{open && (
-					<EditTodoForm
-						todo={todo}
-						key={todo.id}
-						onSuccess={() => onOpenChange(false)}
-						onCancel={() => onOpenChange(false)}
-					/>
-				)}
-			</DialogContent>
-		</Dialog>
 	);
 };

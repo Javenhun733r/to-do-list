@@ -1,7 +1,7 @@
 import { configureStore } from '@reduxjs/toolkit';
 import { useDispatch, useSelector, useStore } from 'react-redux';
-import { todosApi } from './features/api/todosApi';
-import filterReducer from './features/filters/filterSlice';
+import { todosApi } from '../features/todos/api/todosApi';
+import filterReducer from '../features/todos/model/filterSlice';
 
 export const makeStore = () => {
 	return configureStore({

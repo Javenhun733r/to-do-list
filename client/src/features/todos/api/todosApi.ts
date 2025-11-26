@@ -1,5 +1,6 @@
-import { RootState } from '@/lib/store';
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
+
+import type { RootState } from '@/lib/store';
 
 export interface Todo {
 	id: string;

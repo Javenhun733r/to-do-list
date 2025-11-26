@@ -1,4 +1,4 @@
-import { Todo, useUpdateTodoMutation } from '@/lib/features/api/todosApi';
+import { Todo, useUpdateTodoMutation } from '@/features/todos/api/todosApi';
 import {
 	DragEndEvent,
 	KeyboardSensor,
@@ -11,7 +11,7 @@ import { useEffect, useState } from 'react';
 
 export const useTodoDrag = (todos: Todo[]) => {
 	const [items, setItems] = useState<Todo[]>([]);
-	const [updateTodo] = useUpdateTodoMutation();
+	const [updateTodo, { isLoading: isMutatingOrder }] = useUpdateTodoMutation();
 
 	useEffect(() => {
 		setItems(todos);
@@ -65,5 +65,6 @@ export const useTodoDrag = (todos: Todo[]) => {
 		items,
 		sensors,
 		handleDragEnd,
+		isMutatingOrder,
 	};
 };

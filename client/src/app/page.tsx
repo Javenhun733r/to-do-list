@@ -1,12 +1,12 @@
 'use client';
 
 import { ThemeToggle } from '@/components/ThemeToggle';
-import { AddTodoForm } from '@/components/todos/AddTodoForm';
-import { TodoFilters } from '@/components/todos/TodoFilters';
-import { TodoList } from '@/components/todos/TodoList';
 import { Input } from '@/components/ui/input';
+import { AddTodoForm } from '@/features/todos/components/AddTodoForm';
+import { TodoFilters } from '@/features/todos/components/TodoFilters';
+import { TodoList } from '@/features/todos/components/TodoList';
+import { setSearchQuery } from '@/features/todos/model/filterSlice';
 import { useDebounce } from '@/hooks/useDebounce';
-import { setSearchQuery } from '@/lib/features/filters/filterSlice';
 import { useAppDispatch, useAppSelector } from '@/lib/store';
 import { Search } from 'lucide-react';
 import { useEffect, useState } from 'react';

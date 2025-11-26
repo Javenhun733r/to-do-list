@@ -44,22 +44,22 @@ export class UpdateTodoDTO {
 
   @IsOptional()
   @IsInt()
-  @Min(MIN_PRIORITY)
-  @Max(MAX_PRIORITY)
+  @Min(1)
+  @Max(10)
   priority?: number;
+
+  @IsOptional()
+  @IsString()
+  category?: string;
 
   @IsOptional()
   @IsDateString()
   dueDate?: string | null;
 
   @IsOptional()
-  @IsString()
-  category?: string;
-  @IsOptional()
   @IsNumber()
   order?: number;
 }
-
 export class GetTodosFilterDTO {
   @IsOptional()
   @IsEnum(['done', 'undone', 'all'])

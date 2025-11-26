@@ -5,11 +5,11 @@ import {
 } from '@dnd-kit/sortable';
 import { Inbox } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
-import { TodoSkeleton } from '../TodoSkeleton';
+import { TodoSkeleton } from '../../../components/TodoSkeleton';
 import { TodoItem } from './TodoItem';
 
-import { useTodoDrag } from '@/hooks/useTodoDrag';
-import { useGetTodosQuery } from '@/lib/features/api/todosApi';
+import { useGetTodosQuery } from '@/features/todos/api/todosApi';
+import { useTodoDrag } from '@/features/todos/hooks/useTodoDrag';
 import { useAppSelector } from '@/lib/store';
 
 export const TodoList: React.FC = () => {
@@ -29,7 +29,7 @@ export const TodoList: React.FC = () => {
 		category: filters.category,
 	});
 
-	const { items, sensors, handleDragEnd } = useTodoDrag(todos);
+	const { items, sensors, handleDragEnd, isMutatingOrder } = useTodoDrag(todos);
 
 	useEffect(() => {
 		const timer = setTimeout(() => {
@@ -43,6 +43,18 @@ export const TodoList: React.FC = () => {
 
 	const itemIds = useMemo(() => items.map(t => t.id), [items]);
 
+	const isBlockingUi = isFetching || isMutatingOrder;
+	useEffect(() => {
+		if (isBlockingUi) {
+			document.body.classList.add('cursor-wait');
+		} else {
+			document.body.classList.remove('cursor-wait');
+		}
+
+		return () => {
+			document.body.classList.remove('cursor-wait');
+		};
+	}, [isBlockingUi]);
 	if (!isMounted || isLoading) {
 		return (
 			<div className='space-y-3'>
@@ -74,24 +86,36 @@ export const TodoList: React.FC = () => {
 	}
 
 	return (
-		<div className={isFetching ? 'opacity-70 transition-opacity' : ''}>
-			<DndContext
-				sensors={sensors}
-				collisionDetection={closestCenter}
-				onDragEnd={handleDragEnd}
+		<div className='relative'>
+			<div
+				className={
+					isBlockingUi
+						? 'opacity-50 pointer-events-none transition-opacity duration-200'
+						: ''
+				}
 			>
-				<SortableContext
-					items={itemIds}
-					strategy={verticalListSortingStrategy}
-					disabled={!isDragEnabled}
+				<DndContext
+					sensors={sensors}
+					collisionDetection={closestCenter}
+					onDragEnd={handleDragEnd}
 				>
-					<div className='divide-y divide-border space-y-3'>
-						{items.map(todo => (
-							<TodoItem key={todo.id} todo={todo} isDraggable={isDragEnabled} />
-						))}
-					</div>
-				</SortableContext>
-			</DndContext>
+					<SortableContext
+						items={itemIds}
+						strategy={verticalListSortingStrategy}
+						disabled={!isDragEnabled}
+					>
+						<div className='divide-y divide-border space-y-3'>
+							{items.map(todo => (
+								<TodoItem
+									key={todo.id}
+									todo={todo}
+									isDraggable={isDragEnabled}
+								/>
+							))}
+						</div>
+					</SortableContext>
+				</DndContext>
+			</div>
 		</div>
 	);
 };

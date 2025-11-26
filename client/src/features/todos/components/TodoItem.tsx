@@ -5,7 +5,8 @@ import {
 	Todo,
 	useDeleteTodoMutation,
 	useUpdateTodoMutation,
-} from '@/lib/features/api/todosApi';
+} from '@/features/todos/api/todosApi';
+import { getPriorityColor } from '@/lib/constants';
 import {
 	Calendar,
 	CheckCircle,
@@ -60,12 +61,7 @@ export const TodoItem: React.FC<TodoItemProps> = ({
 		deleteTodo(todo.id);
 	};
 
-	const priorityColor =
-		todo.priority >= 8
-			? 'text-destructive bg-destructive/10 border-destructive/20'
-			: todo.priority >= 5
-			? 'text-yellow-600 bg-yellow-500/10 border-yellow-500/20 dark:text-yellow-400'
-			: 'text-blue-600 bg-blue-500/10 border-blue-500/20 dark:text-blue-400';
+	const priorityColor = getPriorityColor(todo.priority);
 
 	const isLoading = isUpdating || isDeleting;
 
