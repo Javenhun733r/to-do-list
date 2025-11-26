@@ -1,9 +1,4 @@
 import {
-	Todo,
-	useGetTodosQuery,
-	useUpdateTodoMutation,
-} from '@/lib/features/todos/todoSlice';
-import {
 	closestCenter,
 	DndContext,
 	DragEndEvent,
@@ -22,33 +17,37 @@ import { Inbox, Loader2 } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { TodoItem } from './TodoItem';
 
-interface TodoListProps {
-	filter: string;
-	search: string;
-	sortBy: string;
-	sortOrder: string;
-}
+import {
+	Todo,
+	useGetTodosQuery,
+	useUpdateTodoMutation,
+} from '@/lib/features/api/todosApi';
 
-export const TodoList: React.FC<TodoListProps> = ({
-	filter,
-	search,
-	sortBy,
-	sortOrder,
-}) => {
+import { useAppSelector } from '@/lib/store';
+
+export const TodoList: React.FC = () => {
+	const [isMounted, setIsMounted] = useState(false);
+
+	const filters = useAppSelector(state => state.filters);
+
 	const {
 		data: todos = [],
 		isLoading,
 		isError,
 	} = useGetTodosQuery({
-		status: filter,
-		search: search,
-		sortBy: sortBy,
-		sortOrder: sortOrder,
+		status: filters.status,
+		search: filters.search,
+		sortBy: filters.sortBy,
+		sortOrder: filters.sortOrder,
+		category: filters.category,
 	});
 
 	const [updateTodo] = useUpdateTodoMutation();
-
 	const [items, setItems] = useState<Todo[]>([]);
+
+	useEffect(() => {
+		setIsMounted(true);
+	}, []);
 
 	useEffect(() => {
 		setItems(todos);
@@ -65,7 +64,8 @@ export const TodoList: React.FC<TodoListProps> = ({
 		})
 	);
 
-	const isDragEnabled = sortBy === 'order' && search === '';
+	const isDragEnabled =
+		filters.sortBy === 'order' && !filters.search && filters.status === 'all';
 
 	const itemIds = useMemo(() => items.map(t => t.id), [items]);
 
@@ -96,10 +96,19 @@ export const TodoList: React.FC<TodoListProps> = ({
 
 			updateTodo({
 				id: active.id as string,
-				patch: { order: newOrderValue },
+				order: newOrderValue,
 			});
 		}
 	};
+
+	if (!isMounted) {
+		return (
+			<div className='flex flex-col items-center justify-center py-20 text-gray-400'>
+				<Loader2 className='animate-spin w-10 h-10 mb-4 text-blue-500' />
+				<p>Initializing...</p>
+			</div>
+		);
+	}
 
 	if (isLoading) {
 		return (
@@ -138,7 +147,7 @@ export const TodoList: React.FC<TodoListProps> = ({
 				strategy={verticalListSortingStrategy}
 				disabled={!isDragEnabled}
 			>
-				<div className='divide-y divide-gray-100'>
+				<div className='divide-y divide-gray-100 dark:divide-gray-800'>
 					{items.map(todo => (
 						<TodoItem key={todo.id} todo={todo} isDraggable={isDragEnabled} />
 					))}

@@ -142,16 +142,18 @@ async function main() {
   const baseOrder = Date.now();
 
   for (let i = 0; i < todos.length; i++) {
-    const todo = todos[i];
+    const { category, ...todoData } = todos[i];
 
     await prisma.todo.create({
       data: {
-        ...todo,
+        ...todoData,
+
         order: baseOrder - i * 1000,
+
+        category: { connect: { name: category } },
       },
     });
   }
-
   console.log(`✅ Seeded ${todos.length} todos.`);
 }
 

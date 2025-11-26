@@ -10,6 +10,7 @@ import {
   Max,
   Min,
 } from 'class-validator';
+import { MAX_PRIORITY, MIN_PRIORITY } from 'src/common/constants';
 
 export class CreateTodoDTO {
   @IsString()
@@ -18,8 +19,8 @@ export class CreateTodoDTO {
 
   @IsOptional()
   @IsInt()
-  @Min(1)
-  @Max(10)
+  @Min(MIN_PRIORITY)
+  @Max(MAX_PRIORITY)
   priority?: number;
 
   @IsOptional()
@@ -43,8 +44,8 @@ export class UpdateTodoDTO {
 
   @IsOptional()
   @IsInt()
-  @Min(1)
-  @Max(10)
+  @Min(MIN_PRIORITY)
+  @Max(MAX_PRIORITY)
   priority?: number;
 
   @IsOptional()
@@ -75,12 +76,16 @@ export class GetTodosFilterDTO {
   @IsOptional()
   @IsEnum(['asc', 'desc'])
   sortOrder?: 'asc' | 'desc';
+
+  @IsOptional()
+  @IsString()
+  category?: string;
 }
 
 export interface TodoResponseDTO {
   id: string;
   title: string;
-  status: 'done' | 'undone';
+  isDone: boolean;
   priority: number;
   dueDate: string | null;
   category: string;

@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { Prisma, Todo } from '@prisma/client';
+import { DEFAULT_CATEGORY } from 'src/common/constants';
 import {
   CreateTodoDTO,
   GetTodosFilterDTO,
@@ -13,16 +14,17 @@ export class TodoMapper {
     return {
       id: entity.id,
       title: entity.title,
-      status: entity.isDone ? 'done' : 'undone',
+
+      isDone: entity.isDone,
+
       priority: entity.priority,
       dueDate: entity.dueDate ? entity.dueDate.toISOString() : null,
-      category: entity.category || 'General',
+      category: (entity.categoryName as string) || DEFAULT_CATEGORY,
       order: entity.order,
       createdAt: entity.createdAt.toISOString(),
       updatedAt: entity.updatedAt.toISOString(),
     };
   }
-
   toDTOList(entities: Todo[]): TodoResponseDTO[] {
     return entities.map((entity) => this.toDTO(entity));
   }
@@ -35,7 +37,7 @@ export class TodoMapper {
       title: dto.title,
       priority: computedPriority,
       dueDate: dto.dueDate ? new Date(dto.dueDate) : null,
-      category: dto.category ?? 'General',
+      category: { connect: { name: dto.category ?? DEFAULT_CATEGORY } },
       order: Date.now(),
       isDone: false,
     };
@@ -45,10 +47,15 @@ export class TodoMapper {
     dto: UpdateTodoDTO,
     computedPriority?: number,
   ): Prisma.TodoUpdateInput {
+    const categoryUpdate: Prisma.TodoUpdateInput['category'] =
+      dto.category === undefined
+        ? undefined
+        : { connect: { name: dto.category } };
+
     return {
       title: dto.title,
       isDone: dto.isDone,
-      category: dto.category,
+
       priority: computedPriority,
       order: typeof dto.order === 'number' ? dto.order : undefined,
       dueDate:
@@ -57,6 +64,8 @@ export class TodoMapper {
           : dto.dueDate
             ? new Date(dto.dueDate)
             : null,
+
+      category: categoryUpdate,
     };
   }
 
@@ -68,6 +77,10 @@ export class TodoMapper {
 
     if (filters.search) {
       where.title = { contains: filters.search, mode: 'insensitive' };
+    }
+
+    if (filters.category && filters.category.toLowerCase() !== 'all') {
+      where.category = { name: filters.category };
     }
 
     return where;

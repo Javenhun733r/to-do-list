@@ -1,5 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import {
+  DEFAULT_PRIORITY,
+  MAX_PRIORITY,
+  MIN_PRIORITY,
+} from 'src/common/constants';
+import {
   CreateTodoDTO,
   GetTodosFilterDTO,
   TodoResponseDTO,
@@ -33,6 +38,9 @@ export class TodoService {
   }
 
   private clampPriority(priority?: number): number {
-    return Math.min(Math.max(priority || 5, 1), 10);
+    return Math.min(
+      Math.max(priority || DEFAULT_PRIORITY, MIN_PRIORITY),
+      MAX_PRIORITY,
+    );
   }
 }

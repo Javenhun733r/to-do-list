@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { TodoNotFoundException } from 'src/exceptions/todo.exceptions';
 import { PrismaService } from '../prisma/prisma.service';
 import {
   CreateTodoDTO,
@@ -30,7 +31,11 @@ export class TodoRepository {
   }
 
   async findById(id: string): Promise<TodoResponseDTO | null> {
-    const todo = await this.prisma.todo.findUnique({ where: { id } });
+    const todo = await this.prisma.todo
+      .findUnique({ where: { id } })
+      .catch(() => {
+        throw new TodoNotFoundException(id);
+      });
     return todo ? this.mapper.toDTO(todo) : null;
   }
 
@@ -40,11 +45,17 @@ export class TodoRepository {
     priority?: number,
   ): Promise<TodoResponseDTO> {
     const data = this.mapper.toPrismaUpdate(dto, priority);
-    const todo = await this.prisma.todo.update({ where: { id }, data });
+    const todo = await this.prisma.todo
+      .update({ where: { id }, data })
+      .catch(() => {
+        throw new TodoNotFoundException(id);
+      });
     return this.mapper.toDTO(todo);
   }
 
   async delete(id: string): Promise<void> {
-    await this.prisma.todo.delete({ where: { id } });
+    await this.prisma.todo.delete({ where: { id } }).catch(() => {
+      throw new TodoNotFoundException(id);
+    });
   }
 }

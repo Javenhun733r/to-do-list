@@ -3,6 +3,8 @@ import { Inter } from 'next/font/google';
 import './globals.css';
 import StoreProvider from './StoreProvider';
 
+import { ThemeProvider } from '@/components/ThemeProvider';
+
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
@@ -16,9 +18,18 @@ export default function RootLayout({
 	children: React.ReactNode;
 }>) {
 	return (
-		<html lang='en'>
+		<html lang='en' suppressHydrationWarning>
 			<body className={inter.className}>
-				<StoreProvider>{children}</StoreProvider>
+				<StoreProvider>
+					<ThemeProvider
+						attribute='class'
+						defaultTheme='system'
+						enableSystem
+						disableTransitionOnChange
+					>
+						{children}
+					</ThemeProvider>
+				</StoreProvider>
 			</body>
 		</html>
 	);
