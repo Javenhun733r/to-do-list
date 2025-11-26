@@ -44,10 +44,12 @@ export const TodoItem: React.FC<TodoItemProps> = ({
 	} = useSortable({ id: todo.id, disabled: !isDraggable });
 
 	const style = {
-		transform: CSS.Transform.toString(transform),
+		transform: CSS.Translate.toString(transform),
+
 		transition,
 		zIndex: isDragging ? 10 : 1,
 		opacity: isDragging ? 0.5 : 1,
+		position: 'relative' as const,
 	};
 
 	const toggleStatus = () => {
@@ -94,15 +96,16 @@ export const TodoItem: React.FC<TodoItemProps> = ({
 			<div
 				ref={setNodeRef}
 				style={style}
-				className={`flex items-center gap-3 p-4 bg-card border border-border rounded-lg shadow-sm hover:shadow-md transition-all group ${
-					isDragging ? 'border-primary shadow-xl' : ''
+				className={`flex items-center gap-3 p-4 bg-card border border-border rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200 group touch-none ${
+					isDragging ? 'border-primary shadow-xl ring-2 ring-primary/20' : ''
 				} ${isLoading ? 'opacity-50 pointer-events-none' : ''}`}
 			>
 				{isDraggable && (
 					<div
 						{...attributes}
 						{...listeners}
-						className='cursor-grab active:cursor-grabbing text-muted-foreground/50 hover:text-muted-foreground p-1'
+						className='cursor-grab active:cursor-grabbing text-muted-foreground/50 hover:text-muted-foreground p-1 shrink-0'
+						aria-label='Drag to reorder'
 					>
 						<GripVertical size={20} />
 					</div>
@@ -111,7 +114,8 @@ export const TodoItem: React.FC<TodoItemProps> = ({
 				<button
 					onClick={toggleStatus}
 					disabled={isLoading}
-					className='shrink-0 text-muted-foreground hover:text-primary transition'
+					aria-label={todo.isDone ? 'Mark as not done' : 'Mark as done'}
+					className='shrink-0 text-muted-foreground hover:text-primary transition-colors'
 				>
 					{todo.isDone ? (
 						<CheckCircle className='text-green-500 w-6 h-6' />
@@ -165,9 +169,11 @@ export const TodoItem: React.FC<TodoItemProps> = ({
 						)}
 					</div>
 				</div>
+
 				<button
 					onClick={() => setIsEditOpen(true)}
 					disabled={isLoading}
+					aria-label='Edit task'
 					className='text-muted-foreground/50 hover:text-primary opacity-0 group-hover:opacity-100 transition-opacity p-2 ml-auto'
 				>
 					<Pencil size={18} />
@@ -176,6 +182,7 @@ export const TodoItem: React.FC<TodoItemProps> = ({
 				<button
 					onClick={handleDelete}
 					disabled={isLoading}
+					aria-label='Delete task'
 					className='text-muted-foreground/50 hover:text-destructive opacity-0 group-hover:opacity-100 transition-opacity p-2'
 				>
 					{isDeleting ? (
@@ -185,6 +192,7 @@ export const TodoItem: React.FC<TodoItemProps> = ({
 					)}
 				</button>
 			</div>
+
 			<EditTodoDialog
 				todo={todo}
 				open={isEditOpen}

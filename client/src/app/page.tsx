@@ -5,14 +5,24 @@ import { AddTodoForm } from '@/components/todos/AddTodoForm';
 import { TodoFilters } from '@/components/todos/TodoFilters';
 import { TodoList } from '@/components/todos/TodoList';
 import { Input } from '@/components/ui/input';
+import { useDebounce } from '@/hooks/useDebounce';
 import { setSearchQuery } from '@/lib/features/filters/filterSlice';
 import { useAppDispatch, useAppSelector } from '@/lib/store';
 import { Search } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
 export default function Home() {
 	const dispatch = useAppDispatch();
 
 	const { search } = useAppSelector(state => state.filters);
+
+	const [inputValue, setInputValue] = useState(search || '');
+
+	const debouncedSearch = useDebounce(inputValue, 500);
+
+	useEffect(() => {
+		dispatch(setSearchQuery(debouncedSearch));
+	}, [debouncedSearch, dispatch]);
 
 	return (
 		<main className='min-h-screen bg-background py-12 px-4 font-sans text-foreground transition-colors duration-300'>
@@ -38,8 +48,8 @@ export default function Home() {
 								<Search className='absolute left-3 top-2.5 h-4 w-4 text-muted-foreground' />
 								<Input
 									placeholder='Search tasks...'
-									value={search}
-									onChange={e => dispatch(setSearchQuery(e.target.value))}
+									value={inputValue}
+									onChange={e => setInputValue(e.target.value)}
 									className='pl-9 bg-background'
 								/>
 							</div>

@@ -1,3 +1,4 @@
+import { RootState } from '@/lib/store';
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 
 export interface Todo {
@@ -55,7 +56,6 @@ export const todosApi = createApi({
 					params: {
 						...params,
 						search: params.search || undefined,
-
 						category:
 							category === 'all' || !category ? undefined : params.category,
 						status: params.status === 'all' ? undefined : params.status,
@@ -86,7 +86,38 @@ export const todosApi = createApi({
 				method: 'PATCH',
 				body,
 			}),
-			invalidatesTags: (result, error, { id }) => [{ type: 'Todos', id }],
+
+			async onQueryStarted(
+				{ id, ...patch },
+				{ dispatch, queryFulfilled, getState }
+			) {
+				if (patch.order !== undefined) {
+					return;
+				}
+
+				const state = getState() as RootState;
+				const filters = state.filters;
+
+				const patchResult = dispatch(
+					todosApi.util.updateQueryData('getTodos', filters, draft => {
+						const todo = draft.find(t => t.id === id);
+						if (todo) {
+							Object.assign(todo, patch);
+						}
+					})
+				);
+
+				try {
+					await queryFulfilled;
+				} catch {
+					patchResult.undo();
+				}
+			},
+
+			invalidatesTags: (result, error, arg) =>
+				arg.order
+					? [{ type: 'Todos', id: 'LIST' }]
+					: [{ type: 'Todos', id: arg.id }],
 		}),
 
 		deleteTodo: builder.mutation<void, string>({
@@ -94,6 +125,26 @@ export const todosApi = createApi({
 				url: `todos/${id}`,
 				method: 'DELETE',
 			}),
+
+			async onQueryStarted(id, { dispatch, queryFulfilled, getState }) {
+				const state = getState() as RootState;
+				const filters = state.filters;
+
+				const patchResult = dispatch(
+					todosApi.util.updateQueryData('getTodos', filters, draft => {
+						const index = draft.findIndex(t => t.id === id);
+						if (index !== -1) {
+							draft.splice(index, 1);
+						}
+					})
+				);
+
+				try {
+					await queryFulfilled;
+				} catch {
+					patchResult.undo();
+				}
+			},
 			invalidatesTags: (result, error, id) => [
 				{ type: 'Todos', id },
 				{ type: 'Todos', id: 'LIST' },

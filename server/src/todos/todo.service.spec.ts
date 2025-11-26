@@ -1,3 +1,4 @@
+import { BadRequestException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { CreateTodoDTO, UpdateTodoDTO } from './dto/todo.dto';
 import { TodoRepository } from './todo.repository';
@@ -15,6 +16,8 @@ describe('TodoService', () => {
   };
 
   beforeEach(async () => {
+    jest.clearAllMocks();
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         TodoService,
@@ -71,6 +74,17 @@ describe('TodoService', () => {
         dto,
         expectedPriority,
       );
+    });
+
+    it('should throw BadRequestException if update DTO is empty', async () => {
+      const dto: UpdateTodoDTO = {};
+      const id = 'uuid';
+
+      await expect(service.updateTodo(id, dto)).rejects.toThrow(
+        BadRequestException,
+      );
+
+      expect(mockTodoRepository.update).not.toHaveBeenCalled();
     });
   });
 });

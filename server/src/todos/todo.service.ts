@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import {
   DEFAULT_PRIORITY,
   MAX_PRIORITY,
@@ -25,11 +25,18 @@ export class TodoService {
     return this.repo.findAll(filters);
   }
 
-  updateTodo(id: string, dto: UpdateTodoDTO): Promise<TodoResponseDTO> {
+  async updateTodo(id: string, dto: UpdateTodoDTO): Promise<TodoResponseDTO> {
+    if (Object.keys(dto).length === 0) {
+      throw new BadRequestException(
+        'At least one field must be provided for update',
+      );
+    }
+
     let priority: number | undefined;
     if (dto.priority !== undefined) {
       priority = this.clampPriority(dto.priority);
     }
+
     return this.repo.update(id, dto, priority);
   }
 

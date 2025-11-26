@@ -1,39 +1,26 @@
+import { closestCenter, DndContext } from '@dnd-kit/core';
 import {
-	closestCenter,
-	DndContext,
-	DragEndEvent,
-	KeyboardSensor,
-	PointerSensor,
-	useSensor,
-	useSensors,
-} from '@dnd-kit/core';
-import {
-	arrayMove,
 	SortableContext,
-	sortableKeyboardCoordinates,
 	verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
-import { Inbox, Loader2 } from 'lucide-react';
+import { Inbox } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
+import { TodoSkeleton } from '../TodoSkeleton';
 import { TodoItem } from './TodoItem';
 
-import {
-	Todo,
-	useGetTodosQuery,
-	useUpdateTodoMutation,
-} from '@/lib/features/api/todosApi';
-
+import { useTodoDrag } from '@/hooks/useTodoDrag';
+import { useGetTodosQuery } from '@/lib/features/api/todosApi';
 import { useAppSelector } from '@/lib/store';
 
 export const TodoList: React.FC = () => {
 	const [isMounted, setIsMounted] = useState(false);
-
 	const filters = useAppSelector(state => state.filters);
 
 	const {
 		data: todos = [],
 		isLoading,
 		isError,
+		isFetching,
 	} = useGetTodosQuery({
 		status: filters.status,
 		search: filters.search,
@@ -42,117 +29,69 @@ export const TodoList: React.FC = () => {
 		category: filters.category,
 	});
 
-	const [updateTodo] = useUpdateTodoMutation();
-	const [items, setItems] = useState<Todo[]>([]);
+	const { items, sensors, handleDragEnd } = useTodoDrag(todos);
 
 	useEffect(() => {
-		setIsMounted(true);
+		const timer = setTimeout(() => {
+			setIsMounted(true);
+		}, 0);
+		return () => clearTimeout(timer);
 	}, []);
-
-	useEffect(() => {
-		setItems(todos);
-	}, [todos]);
-
-	const sensors = useSensors(
-		useSensor(PointerSensor, {
-			activationConstraint: {
-				distance: 8,
-			},
-		}),
-		useSensor(KeyboardSensor, {
-			coordinateGetter: sortableKeyboardCoordinates,
-		})
-	);
 
 	const isDragEnabled =
 		filters.sortBy === 'order' && !filters.search && filters.status === 'all';
 
 	const itemIds = useMemo(() => items.map(t => t.id), [items]);
 
-	const handleDragEnd = (event: DragEndEvent) => {
-		const { active, over } = event;
-
-		if (active.id !== over?.id && over) {
-			const oldIndex = items.findIndex(t => t.id === active.id);
-			const newIndex = items.findIndex(t => t.id === over.id);
-
-			const newOrderList = arrayMove(items, oldIndex, newIndex);
-			setItems(newOrderList);
-
-			const prevItem = newOrderList[newIndex - 1];
-			const nextItem = newOrderList[newIndex + 1];
-
-			let newOrderValue: number;
-
-			if (!prevItem && !nextItem) {
-				newOrderValue = Date.now();
-			} else if (!prevItem) {
-				newOrderValue = nextItem.order + 1000;
-			} else if (!nextItem) {
-				newOrderValue = prevItem.order - 1000;
-			} else {
-				newOrderValue = (prevItem.order + nextItem.order) / 2;
-			}
-
-			updateTodo({
-				id: active.id as string,
-				order: newOrderValue,
-			});
-		}
-	};
-
-	if (!isMounted) {
+	if (!isMounted || isLoading) {
 		return (
-			<div className='flex flex-col items-center justify-center py-20 text-gray-400'>
-				<Loader2 className='animate-spin w-10 h-10 mb-4 text-blue-500' />
-				<p>Initializing...</p>
-			</div>
-		);
-	}
-
-	if (isLoading) {
-		return (
-			<div className='flex flex-col items-center justify-center py-20 text-gray-400'>
-				<Loader2 className='animate-spin w-10 h-10 mb-4 text-blue-500' />
-				<p>Loading your tasks...</p>
+			<div className='space-y-3'>
+				{[...Array(5)].map((_, i) => (
+					<TodoSkeleton key={i} />
+				))}
 			</div>
 		);
 	}
 
 	if (isError) {
 		return (
-			<div className='p-10 text-center text-red-500'>
-				Error loading tasks. Is the server running?
+			<div className='p-10 text-center text-destructive bg-destructive/10 rounded-lg border border-destructive/20'>
+				<p>Error loading tasks.</p>
+				<p className='text-sm opacity-80'>
+					Please check if the backend is running.
+				</p>
 			</div>
 		);
 	}
 
 	if (items.length === 0) {
 		return (
-			<div className='flex flex-col items-center justify-center py-20 text-gray-400'>
-				<Inbox size={32} className='text-gray-300 mb-4' />
+			<div className='flex flex-col items-center justify-center py-20 text-muted-foreground'>
+				<Inbox size={32} className='mb-4 opacity-50' />
 				<p>No tasks found</p>
 			</div>
 		);
 	}
 
 	return (
-		<DndContext
-			sensors={sensors}
-			collisionDetection={closestCenter}
-			onDragEnd={handleDragEnd}
-		>
-			<SortableContext
-				items={itemIds}
-				strategy={verticalListSortingStrategy}
-				disabled={!isDragEnabled}
+		<div className={isFetching ? 'opacity-70 transition-opacity' : ''}>
+			<DndContext
+				sensors={sensors}
+				collisionDetection={closestCenter}
+				onDragEnd={handleDragEnd}
 			>
-				<div className='divide-y divide-gray-100 dark:divide-gray-800'>
-					{items.map(todo => (
-						<TodoItem key={todo.id} todo={todo} isDraggable={isDragEnabled} />
-					))}
-				</div>
-			</SortableContext>
-		</DndContext>
+				<SortableContext
+					items={itemIds}
+					strategy={verticalListSortingStrategy}
+					disabled={!isDragEnabled}
+				>
+					<div className='divide-y divide-border space-y-3'>
+						{items.map(todo => (
+							<TodoItem key={todo.id} todo={todo} isDraggable={isDragEnabled} />
+						))}
+					</div>
+				</SortableContext>
+			</DndContext>
+		</div>
 	);
 };
