@@ -8,6 +8,7 @@ import {
   IsOptional,
   IsString,
   Max,
+  MaxLength,
   Min,
 } from 'class-validator';
 import { MAX_PRIORITY, MIN_PRIORITY } from '../../common/constants';
@@ -15,6 +16,7 @@ import { MAX_PRIORITY, MIN_PRIORITY } from '../../common/constants';
 export class CreateTodoDTO {
   @IsString()
   @IsNotEmpty()
+  @MaxLength(255, { message: 'Title is too long (max 255 chars)' })
   title!: string;
 
   @IsOptional()
@@ -36,6 +38,7 @@ export class UpdateTodoDTO {
   @IsOptional()
   @IsString()
   @IsNotEmpty()
+  @MaxLength(255, { message: 'Title is too long (max 255 chars)' })
   title?: string;
 
   @IsOptional()

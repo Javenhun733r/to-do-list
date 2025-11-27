@@ -8,27 +8,22 @@ import { useEffect, useMemo, useState } from 'react';
 import { TodoSkeleton } from '../../../../components/shared/TodoSkeleton';
 import { TodoItem } from './TodoItem';
 
-import { useGetTodosQuery } from '@/features/todos/api/todosApi';
+import { Todo, useGetTodosQuery } from '@/features/todos/api/todosApi';
 import { useTodoDrag } from '@/features/todos/hooks/useTodoDrag';
 import { useAppSelector } from '@/lib/store';
-
+const EMPTY_TODOS: Todo[] = [];
 export const TodoList: React.FC = () => {
 	const [isMounted, setIsMounted] = useState(false);
 	const filters = useAppSelector(state => state.filters);
 
-	const {
-		data: todos = [],
-		isLoading,
-		isError,
-		isFetching,
-	} = useGetTodosQuery({
+	const { data, isLoading, isError, isFetching } = useGetTodosQuery({
 		status: filters.status,
 		search: filters.search,
 		sortBy: filters.sortBy,
 		sortOrder: filters.sortOrder,
 		category: filters.category,
 	});
-
+	const todos = data || EMPTY_TODOS;
 	const { items, sensors, handleDragEnd, isMutatingOrder } = useTodoDrag(todos);
 
 	useEffect(() => {
