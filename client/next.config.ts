@@ -8,7 +8,9 @@ const nextConfig: NextConfig = {
 		return [
 			{
 				source: '/api/:path*',
-				destination: 'http://server:3001/api/:path*',
+				destination: `${
+					process.env.SERVER_URL || 'http://server:3001'
+				}/api/:path*`,
 			},
 		];
 	},
