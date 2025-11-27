@@ -65,7 +65,7 @@ export const TodoItem: React.FC<TodoItemProps> = ({
 			<div
 				ref={setNodeRef}
 				style={style}
-				className={`flex items-center gap-3 p-4 bg-card border border-border rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200 group touch-none ${
+				className={`flex items-center gap-3 p-4 bg-card border border-border rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200 group ${
 					isDragging ? 'border-primary shadow-xl ring-2 ring-primary/20' : ''
 				} ${isLoading ? 'opacity-50 pointer-events-none' : ''}`}
 			>
@@ -73,7 +73,7 @@ export const TodoItem: React.FC<TodoItemProps> = ({
 					<div
 						{...attributes}
 						{...listeners}
-						className='cursor-grab active:cursor-grabbing text-muted-foreground/50 hover:text-muted-foreground p-1 shrink-0'
+						className='cursor-grab active:cursor-grabbing text-muted-foreground/50 hover:text-muted-foreground p-1 shrink-0 touch-none'
 						aria-label='Drag to reorder'
 					>
 						<GripVertical size={20} />
