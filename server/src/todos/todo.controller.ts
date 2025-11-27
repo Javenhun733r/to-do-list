@@ -1,4 +1,11 @@
 import {
+  CreateTodoDTO,
+  GetTodosFilterDTO,
+  TodoResponseDTO,
+  UpdateTodoDTO,
+} from '@/todos/dto/todo.dto';
+import { TodoService } from '@/todos/todo.service';
+import {
   Body,
   Controller,
   Delete,
@@ -8,13 +15,6 @@ import {
   Post,
   Query,
 } from '@nestjs/common';
-import {
-  CreateTodoDTO,
-  GetTodosFilterDTO,
-  TodoResponseDTO,
-  UpdateTodoDTO,
-} from './dto/todo.dto';
-import { TodoService } from './todo.service';
 
 @Controller('todos')
 export class TodoController {

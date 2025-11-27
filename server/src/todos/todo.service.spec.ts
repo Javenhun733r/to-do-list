@@ -1,8 +1,8 @@
+import { CreateTodoDTO, UpdateTodoDTO } from '@/todos/dto/todo.dto';
+import { TodoRepository } from '@/todos/todo.repository';
+import { TodoService } from '@/todos/todo.service';
 import { BadRequestException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { CreateTodoDTO, UpdateTodoDTO } from './dto/todo.dto';
-import { TodoRepository } from './todo.repository';
-import { TodoService } from './todo.service';
 
 describe('TodoService', () => {
   let service: TodoService;

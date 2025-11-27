@@ -1,9 +1,9 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
 import {
   DEFAULT_PRIORITY,
   MAX_PRIORITY,
   MIN_PRIORITY,
-} from 'src/common/constants';
+} from '@/common/constants';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import {
   CreateTodoDTO,
   GetTodosFilterDTO,

@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
-import { CategoriesController } from './categories.controller';
-import { CategoriesRepository } from './categories.repository';
-import { CategoriesService } from './categories.service';
-import { CategoryMapper } from './mappers/category.mapper';
+import { CategoriesController } from '@/categories/categories.controller';
+import { CategoriesRepository } from '@/categories/categories.repository';
+import { CategoriesService } from '@/categories/categories.service';
+import { CategoryMapper } from '@/categories/mappers/category.mapper';
 
 @Module({
   controllers: [CategoriesController],

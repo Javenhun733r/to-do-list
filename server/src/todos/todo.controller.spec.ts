@@ -3,9 +3,9 @@ import {
   CreateTodoDTO,
   GetTodosFilterDTO,
   UpdateTodoDTO,
-} from './dto/todo.dto';
-import { TodoController } from './todo.controller';
-import { TodoService } from './todo.service';
+} from '@/todos/dto/todo.dto';
+import { TodoController } from '@/todos/todo.controller';
+import { TodoService } from '@/todos/todo.service';
 
 describe('TodoController', () => {
   let controller: TodoController;
