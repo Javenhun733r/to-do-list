@@ -5,6 +5,7 @@ const nextConfig: NextConfig = {
 		NEXT_PUBLIC_API_URL: '/api',
 	},
 	async rewrites() {
+		console.log('DEBUG: SERVER_URL is', process.env.SERVER_URL);
 		return [
 			{
 				source: '/api/:path*',
