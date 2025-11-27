@@ -5,7 +5,7 @@ import {
 	DialogTitle,
 } from '@/components/ui/dialog';
 import { Todo } from '@/features/todos/api/todosApi';
-import { EditTodoForm } from './EditTodoForm';
+import { EditTodoForm } from '../forms/EditTodoForm';
 
 interface EditTodoDialogProps {
 	todo: Todo;

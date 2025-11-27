@@ -14,30 +14,51 @@ import {
 	SelectValue,
 } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
-import {
-	GetTodosParams,
-	useGetCategoriesQuery,
-} from '@/features/todos/api/todosApi';
-import {
-	setFilterCategory,
-	setFilterStatus,
-	setSort,
-} from '@/features/todos/model/filterSlice';
-import { useAppDispatch, useAppSelector } from '@/lib/store';
+import { useGetCategoriesQuery } from '@/features/todos/api/todosApi';
+import { useAppSelector } from '@/lib/store';
 import { ArrowDownAZ, ArrowUpAZ, Filter } from 'lucide-react';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
 export const TodoFilters = () => {
-	const dispatch = useAppDispatch();
+	const router = useRouter();
+	const pathname = usePathname();
+	const searchParams = useSearchParams();
+
 	const { data: categories = [] } = useGetCategoriesQuery();
 
 	const { status, sortBy, sortOrder, category } = useAppSelector(
 		state => state.filters
 	);
 
+	const updateUrl = (key: string, value: string | undefined) => {
+		const params = new URLSearchParams(searchParams.toString());
+		if (value === 'all' || value === undefined) {
+			params.delete(key);
+		} else {
+			params.set(key, value);
+		}
+		router.push(`${pathname}?${params.toString()}`);
+	};
+
+	const handleStatusChange = (val: string) => {
+		updateUrl('status', val);
+	};
+
+	const handleCategoryChange = (val: string) => {
+		updateUrl('category', val);
+	};
+
+	const handleSortByChange = (val: string) => {
+		updateUrl('sortBy', val);
+	};
+
+	const handleSortOrderToggle = () => {
+		const newOrder = sortOrder === 'asc' ? 'desc' : 'asc';
+		updateUrl('sortOrder', newOrder);
+	};
+
 	const resetFilters = () => {
-		dispatch(setFilterStatus('all'));
-		dispatch(setFilterCategory('all'));
-		dispatch(setSort({ sortBy: 'createdAt', sortOrder: 'desc' }));
+		router.push(pathname);
 	};
 
 	const activeFiltersCount = [
@@ -85,12 +106,7 @@ export const TodoFilters = () => {
 							<label className='text-xs font-medium text-muted-foreground'>
 								Status
 							</label>
-							<Select
-								value={status}
-								onValueChange={(val: string) =>
-									dispatch(setFilterStatus(val as GetTodosParams['status']))
-								}
-							>
+							<Select value={status} onValueChange={handleStatusChange}>
 								<SelectTrigger className='w-full bg-background'>
 									<SelectValue placeholder='Select status' />
 								</SelectTrigger>
@@ -108,9 +124,7 @@ export const TodoFilters = () => {
 							</label>
 							<Select
 								value={category || 'all'}
-								onValueChange={(val: string) =>
-									dispatch(setFilterCategory(val))
-								}
+								onValueChange={handleCategoryChange}
 							>
 								<SelectTrigger className='w-full bg-background'>
 									<SelectValue placeholder='Select category' />
@@ -130,17 +144,7 @@ export const TodoFilters = () => {
 								Sorting
 							</label>
 							<div className='flex gap-2'>
-								<Select
-									value={sortBy}
-									onValueChange={(val: string) =>
-										dispatch(
-											setSort({
-												sortBy: val as GetTodosParams['sortBy'],
-												sortOrder,
-											})
-										)
-									}
-								>
+								<Select value={sortBy} onValueChange={handleSortByChange}>
 									<SelectTrigger className='flex-1 bg-background'>
 										<SelectValue placeholder='Sort by' />
 									</SelectTrigger>
@@ -156,14 +160,7 @@ export const TodoFilters = () => {
 									variant='outline'
 									size='icon'
 									className='shrink-0'
-									onClick={() =>
-										dispatch(
-											setSort({
-												sortBy,
-												sortOrder: sortOrder === 'asc' ? 'desc' : 'asc',
-											})
-										)
-									}
+									onClick={handleSortOrderToggle}
 								>
 									{sortOrder === 'asc' ? (
 										<ArrowUpAZ className='h-4 w-4' />

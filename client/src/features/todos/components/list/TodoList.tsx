@@ -5,7 +5,7 @@ import {
 } from '@dnd-kit/sortable';
 import { Inbox } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
-import { TodoSkeleton } from '../../../components/TodoSkeleton';
+import { TodoSkeleton } from '../../../../components/shared/TodoSkeleton';
 import { TodoItem } from './TodoItem';
 
 import { useGetTodosQuery } from '@/features/todos/api/todosApi';

@@ -1,28 +1,79 @@
 'use client';
 
-import { ThemeToggle } from '@/components/ThemeToggle';
+import { ThemeToggle } from '@/components/shared/ThemeToggle';
 import { Input } from '@/components/ui/input';
-import { AddTodoForm } from '@/features/todos/components/AddTodoForm';
+import type { GetTodosParams } from '@/features/todos/api/todosApi';
+import { AddTodoForm } from '@/features/todos/components/forms/AddTodoForm';
+import { TodoList } from '@/features/todos/components/list/TodoList';
 import { TodoFilters } from '@/features/todos/components/TodoFilters';
-import { TodoList } from '@/features/todos/components/TodoList';
-import { setSearchQuery } from '@/features/todos/model/filterSlice';
+import {
+	setFilterCategory,
+	setFilterStatus,
+	setSearchQuery,
+	setSort,
+} from '@/features/todos/model/filterSlice';
 import { useDebounce } from '@/hooks/useDebounce';
-import { useAppDispatch, useAppSelector } from '@/lib/store';
+import { useAppDispatch } from '@/lib/store';
 import { Search } from 'lucide-react';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
+
+const DEFAULT_FILTERS = {
+	status: 'all',
+	sortBy: 'order',
+	sortOrder: 'desc',
+	category: 'all',
+	search: '',
+};
 
 export default function Home() {
 	const dispatch = useAppDispatch();
+	const router = useRouter();
+	const pathname = usePathname();
+	const searchParams = useSearchParams();
 
-	const { search } = useAppSelector(state => state.filters);
+	const currentUrlSearch = searchParams.get('search') || '';
 
-	const [inputValue, setInputValue] = useState(search || '');
+	const [inputValue, setInputValue] = useState(currentUrlSearch);
 
 	const debouncedSearch = useDebounce(inputValue, 500);
 
 	useEffect(() => {
-		dispatch(setSearchQuery(debouncedSearch));
-	}, [debouncedSearch, dispatch]);
+		const currentStatus = searchParams.get('status') || DEFAULT_FILTERS.status;
+		const currentCategory =
+			searchParams.get('category') || DEFAULT_FILTERS.category;
+		const currentSortBy = searchParams.get('sortBy') || DEFAULT_FILTERS.sortBy;
+		const currentSortOrder =
+			searchParams.get('sortOrder') || DEFAULT_FILTERS.sortOrder;
+
+		dispatch(setFilterStatus(currentStatus as GetTodosParams['status']));
+		dispatch(setFilterCategory(currentCategory));
+		dispatch(
+			setSort({
+				sortBy: currentSortBy as GetTodosParams['sortBy'],
+				sortOrder: currentSortOrder as GetTodosParams['sortOrder'],
+			})
+		);
+		dispatch(setSearchQuery(currentUrlSearch));
+	}, [searchParams, dispatch, currentUrlSearch]);
+
+	useEffect(() => {
+		setInputValue(currentUrlSearch);
+	}, [currentUrlSearch]);
+
+	useEffect(() => {
+		const params = new URLSearchParams(searchParams.toString());
+
+		if (debouncedSearch) {
+			params.set('search', debouncedSearch);
+		} else {
+			params.delete('search');
+		}
+
+		if (params.toString() !== searchParams.toString()) {
+			router.push(`${pathname}?${params.toString()}`, { scroll: false });
+		}
+	}, [debouncedSearch, pathname, router, searchParams]);
 
 	return (
 		<main className='min-h-screen bg-background py-12 px-4 font-sans text-foreground transition-colors duration-300'>
