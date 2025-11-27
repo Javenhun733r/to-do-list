@@ -48,6 +48,8 @@ services:
     container_name: todo_client
     ports:
       - "${CLIENT_PORT:-3000}:3000"
+    environment:
+      SERVER_URL: "${SERVER_URL}"
     depends_on:
       server:
         condition: service_healthy
