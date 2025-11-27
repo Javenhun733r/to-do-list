@@ -1,12 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { Prisma, Todo } from '@prisma/client';
-import { DEFAULT_CATEGORY } from '@/common/constants';
+import { DEFAULT_CATEGORY } from '../../common/constants';
 import {
   CreateTodoDTO,
   GetTodosFilterDTO,
   TodoResponseDTO,
   UpdateTodoDTO,
-} from '@/todos/dto/todo.dto';
+} from '../dto/todo.dto';
 
 @Injectable()
 export class TodoMapper {

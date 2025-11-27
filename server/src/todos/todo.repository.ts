@@ -1,13 +1,13 @@
-import { TodoNotFoundException } from '@/exceptions/todo.exceptions';
-import { PrismaService } from '@/prisma/prisma.service';
+import { Injectable } from '@nestjs/common';
+import { TodoNotFoundException } from '../exceptions/todo.exceptions';
+import { PrismaService } from '../prisma/prisma.service';
 import {
   CreateTodoDTO,
   GetTodosFilterDTO,
   TodoResponseDTO,
   UpdateTodoDTO,
-} from '@/todos/dto/todo.dto';
-import { TodoMapper } from '@/todos/mappers/todo.mapper';
-import { Injectable } from '@nestjs/common';
+} from './dto/todo.dto';
+import { TodoMapper } from './mappers/todo.mapper';
 
 @Injectable()
 export class TodoRepository {

@@ -17,4 +17,4 @@ RUN npm run build
 
 EXPOSE 3001
 
-CMD ["/bin/sh", "-c", "npx prisma migrate deploy && npm run seed && node -r tsconfig-paths/register dist/src/main"]
+CMD ["/bin/sh", "-c", "npx prisma migrate deploy && npm run seed && node dist/src/main"]

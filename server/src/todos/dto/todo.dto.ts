@@ -10,7 +10,7 @@ import {
   Max,
   Min,
 } from 'class-validator';
-import { MAX_PRIORITY, MIN_PRIORITY } from '@/common/constants';
+import { MAX_PRIORITY, MIN_PRIORITY } from '../../common/constants';
 
 export class CreateTodoDTO {
   @IsString()

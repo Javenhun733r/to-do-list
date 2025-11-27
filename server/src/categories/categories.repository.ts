@@ -1,8 +1,8 @@
 import { ConflictException, Injectable } from '@nestjs/common';
-import { PrismaService } from '@/prisma/prisma.service';
-import { CategoryResponseDto } from '@/categories/dto/category-response.dto';
-import { CreateCategoryDto } from '@/categories/dto/create-category.dto';
-import { CategoryMapper } from '@/categories/mappers/category.mapper';
+import { PrismaService } from '../prisma/prisma.service';
+import { CategoryResponseDto } from './dto/category-response.dto';
+import { CreateCategoryDto } from './dto/create-category.dto';
+import { CategoryMapper } from './mappers/category.mapper';
 
 @Injectable()
 export class CategoriesRepository {

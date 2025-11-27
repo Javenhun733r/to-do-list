@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Category, Prisma } from '@prisma/client';
-import { CategoryResponseDto } from '@/categories/dto/category-response.dto';
-import { CreateCategoryDto } from '@/categories/dto/create-category.dto';
+import { CategoryResponseDto } from '../dto/category-response.dto';
+import { CreateCategoryDto } from '../dto/create-category.dto';
 
 @Injectable()
 export class CategoryMapper {
