@@ -6,7 +6,7 @@ import {
   GetTodosFilterDTO,
   TodoResponseDTO,
   UpdateTodoDTO,
-} from '../dto/todo.dto';
+} from '../dto/index';
 
 @Injectable()
 export class TodoMapper {

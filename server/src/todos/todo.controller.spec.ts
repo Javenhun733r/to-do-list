@@ -1,9 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import {
-  CreateTodoDTO,
-  GetTodosFilterDTO,
-  UpdateTodoDTO,
-} from './dto/todo.dto';
+import { CreateTodoDTO, GetTodosFilterDTO, UpdateTodoDTO } from './dto/index';
 import { TodoController } from './todo.controller';
 import { TodoService } from './todo.service';
 

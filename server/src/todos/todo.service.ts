@@ -9,9 +9,9 @@ import {
   GetTodosFilterDTO,
   TodoResponseDTO,
   UpdateTodoDTO,
-} from './dto/todo.dto';
-import { TodoRepository } from './todo.repository';
+} from './dto/index';
 
+import { TodoRepository } from './todo.repository';
 @Injectable()
 export class TodoService {
   constructor(private readonly repo: TodoRepository) {}

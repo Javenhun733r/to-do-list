@@ -1,6 +1,6 @@
 import { BadRequestException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { CreateTodoDTO, UpdateTodoDTO } from './dto/todo.dto';
+import { CreateTodoDTO, UpdateTodoDTO } from './dto/index';
 import { TodoRepository } from './todo.repository';
 import { TodoService } from './todo.service';
 

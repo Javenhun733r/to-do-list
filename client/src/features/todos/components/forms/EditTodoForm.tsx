@@ -15,14 +15,21 @@ interface ToastInput extends ToastProps {
 	variant?: 'default' | 'destructive';
 }
 
+interface ApiError {
+	status?: number;
+	data?: {
+		message?: string | string[];
+	};
+}
+
 interface EditTodoFormProps {
 	todo: Todo;
 	onSuccess: () => void;
 	onCancel: () => void;
 }
+
 const formatDateForInput = (dateString?: string | null) => {
 	if (!dateString) return '';
-
 	return new Date(dateString).toISOString().split('T')[0];
 };
 
@@ -61,13 +68,21 @@ export const EditTodoForm = ({
 			} as ToastInput);
 
 			onSuccess();
-		} catch (err) {
+		} catch (error: unknown) {
+			const err = error as ApiError;
 			console.error('Failed to update todo', err);
+
+			let errorMessage = 'Failed to update the task. Please try again.';
+			if (err?.data?.message) {
+				errorMessage = Array.isArray(err.data.message)
+					? err.data.message[0]
+					: err.data.message;
+			}
 
 			toast({
 				variant: 'destructive',
 				title: 'Error',
-				description: 'Failed to update the task. Please try again.',
+				description: errorMessage,
 			} as ToastInput);
 		}
 	};

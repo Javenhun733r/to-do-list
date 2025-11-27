@@ -13,7 +13,7 @@ import {
   GetTodosFilterDTO,
   TodoResponseDTO,
   UpdateTodoDTO,
-} from './dto/todo.dto';
+} from './dto/index';
 import { TodoService } from './todo.service';
 
 @Controller('todos')

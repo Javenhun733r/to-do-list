@@ -25,6 +25,13 @@ interface CreateCategoryDialogProps {
 	onCategoryCreated: (categoryName: string) => void;
 }
 
+interface ApiError {
+	status?: number;
+	data?: {
+		message?: string | string[];
+	};
+}
+
 export const CreateCategoryDialog = ({
 	open,
 	onOpenChange,
@@ -47,13 +54,24 @@ export const CreateCategoryDialog = ({
 			onCategoryCreated(newCategoryName);
 			setNewCategoryName('');
 			onOpenChange(false);
-		} catch (err) {
+		} catch (error: unknown) {
+			const err = error as ApiError;
 			console.error('Failed to create category', err);
+
+			let errorMessage = 'Failed to create category.';
+
+			if (err?.data?.message) {
+				errorMessage = Array.isArray(err.data.message)
+					? err.data.message[0]
+					: err.data.message;
+			} else if (err.status === 409) {
+				errorMessage = 'Category already exists.';
+			}
 
 			toast({
 				variant: 'destructive',
 				title: 'Creation Failed',
-				description: 'Failed to create category. It may already exist.',
+				description: errorMessage,
 			} as ToastInput);
 		}
 	};

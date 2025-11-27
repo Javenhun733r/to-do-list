@@ -13,6 +13,13 @@ interface ToastInput extends ToastProps {
 	variant?: 'default' | 'destructive';
 }
 
+interface ApiError {
+	status?: number;
+	data?: {
+		message?: string | string[];
+	};
+}
+
 export const AddTodoForm = () => {
 	const { toast } = useToast();
 	const [title, setTitle] = useState('');
@@ -24,9 +31,7 @@ export const AddTodoForm = () => {
 	const [createTodo, { isLoading }] = useCreateTodoMutation();
 	const { data: categories = [] } = useGetCategoriesQuery();
 
-	if (!category && categories.length > 0) {
-		setCategory(categories[0].name);
-	}
+	const activeCategory = category || categories[0]?.name || '';
 
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
@@ -36,7 +41,8 @@ export const AddTodoForm = () => {
 			await createTodo({
 				title,
 				priority: Number(priority),
-				category: category || 'General',
+
+				category: activeCategory || 'General',
 				dueDate: dueDate ? new Date(dueDate).toISOString() : null,
 			}).unwrap();
 
@@ -48,13 +54,21 @@ export const AddTodoForm = () => {
 			setTitle('');
 			setPriority('5');
 			setDueDate('');
-		} catch (err) {
+		} catch (error: unknown) {
+			const err = error as ApiError;
 			console.error('Failed to add todo', err);
+
+			let errorMessage = 'Failed to add the task. Please try again.';
+			if (err?.data?.message) {
+				errorMessage = Array.isArray(err.data.message)
+					? err.data.message[0]
+					: err.data.message;
+			}
 
 			toast({
 				variant: 'destructive',
 				title: 'Error creating task',
-				description: 'Failed to add the task. Please try again.',
+				description: errorMessage,
 			} as ToastInput);
 		}
 	};
@@ -74,7 +88,7 @@ export const AddTodoForm = () => {
 				setTitle={setTitle}
 				priority={priority}
 				setPriority={setPriority}
-				category={category}
+				category={activeCategory}
 				handleCategoryChange={handleCategoryChange}
 				dueDate={dueDate}
 				setDueDate={setDueDate}
