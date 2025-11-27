@@ -112,8 +112,8 @@ export const TodoFilters = () => {
 								</SelectTrigger>
 								<SelectContent>
 									<SelectItem value='all'>All Statuses</SelectItem>
-									<SelectItem value='done'>Completed</SelectItem>
-									<SelectItem value='undone'>To Do</SelectItem>
+									<SelectItem value='done'>Done</SelectItem>
+									<SelectItem value='undone'>Undone</SelectItem>
 								</SelectContent>
 							</Select>
 						</div>
